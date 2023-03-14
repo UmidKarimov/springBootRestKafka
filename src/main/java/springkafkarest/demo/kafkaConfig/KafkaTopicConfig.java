@@ -8,6 +8,6 @@ import org.springframework.kafka.config.TopicBuilder;
 public class KafkaTopicConfig {
 
     public NewTopic myTopic(){
-        return TopicBuilder.name("add-employee").build();
+        return TopicBuilder.name("employee-events").build();
     }
 }

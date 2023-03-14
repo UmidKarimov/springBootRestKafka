@@ -3,10 +3,11 @@ package springkafkarest.demo.controller;
 
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 import springkafkarest.demo.entity.Employee;
+import springkafkarest.demo.events.EmployeeEvent;
+import springkafkarest.demo.events.EmployeeEventTypes;
 import springkafkarest.demo.service.EmployeeService;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
     @Autowired
-    private KafkaTemplate kafkaTemplate;
+    private KafkaTemplate<String, String> kafkaTemplate;
     @Autowired
     private Gson jsonConverter;
 
@@ -40,14 +41,17 @@ public class EmployeeController {
     @PostMapping("/employees")
     public void addNewEmployee(@RequestBody Employee employee){
 
-        kafkaTemplate.send("add-employee", jsonConverter.toJson(employee));
+        EmployeeEvent event = new EmployeeEvent(employee, EmployeeEventTypes.ADD);
+        kafkaTemplate.send("employee-events", jsonConverter.toJson(event));
 
     }
 
     @PutMapping("/employees")
     public void updateEmployee(@RequestBody Employee employee){
 
-        employeeService.saveEmployee(employee);
+        EmployeeEvent event = new EmployeeEvent(employee, EmployeeEventTypes.PATCH);
+        kafkaTemplate.send("employee-events", jsonConverter.toJson(event));
+        //employeeService.saveEmployee(employee);
 
 
 
@@ -55,10 +59,11 @@ public class EmployeeController {
 
     @DeleteMapping("/employees/{id}")
     public void deleteEmployee(@PathVariable("id") int id){
+
         Employee employee = employeeService.getEmployeeById(id);
-
-
-        employeeService.deleteEmployee(id);
+        EmployeeEvent event = new EmployeeEvent(employee, EmployeeEventTypes.DELETE);
+        kafkaTemplate.send("employee-events", jsonConverter.toJson(event));
+        //employeeService.deleteEmployee(id);
 
 
     }
