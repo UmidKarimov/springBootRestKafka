@@ -42,7 +42,7 @@ public class EmployeeController {
     public void addNewEmployee(@RequestBody Employee employee){
 
         EmployeeEvent event = new EmployeeEvent(employee, EmployeeEventTypes.ADD);
-        kafkaTemplate.send("employee-events", jsonConverter.toJson(event));
+        kafkaTemplate.send("employee-events", Integer.toString(employee.getId()),jsonConverter.toJson(event));
 
     }
 
@@ -50,8 +50,7 @@ public class EmployeeController {
     public void updateEmployee(@RequestBody Employee employee){
 
         EmployeeEvent event = new EmployeeEvent(employee, EmployeeEventTypes.PATCH);
-        kafkaTemplate.send("employee-events", jsonConverter.toJson(event));
-        //employeeService.saveEmployee(employee);
+        kafkaTemplate.send("employee-events", Integer.toString(employee.getId()), jsonConverter.toJson(event));
 
 
 
@@ -62,8 +61,7 @@ public class EmployeeController {
 
         Employee employee = employeeService.getEmployeeById(id);
         EmployeeEvent event = new EmployeeEvent(employee, EmployeeEventTypes.DELETE);
-        kafkaTemplate.send("employee-events", jsonConverter.toJson(event));
-        //employeeService.deleteEmployee(id);
+        kafkaTemplate.send("employee-events", Integer.toString(employee.getId()), jsonConverter.toJson(event));
 
 
     }
